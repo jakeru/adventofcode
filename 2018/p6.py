@@ -39,9 +39,51 @@ def closest_coords(coords, coord):
             closest.append(i)
     return closest
 
+def find_largest_area(coords):
+    print("Number of coords: {}".format(len(coords)))
+    (min_c, max_c) = min_max(coords)
+    width = max_c.x - min_c.x
+    height = max_c.y - min_c.y
+    print("Coords min: {}, max: {}".format(min_c, max_c))
+    print("Locations: {} x {} = {}".format(width, height, width * height))
+    areas = {}
+    infinite_areas = {}
+    for y in range(min_c.y, max_c.y + 1):
+        for x in range(min_c.x, max_c.x + 1):
+            closest = closest_coords(coords, Coord(x, y))
+            if len(closest) > 1:
+                continue
+            assert(len(closest) == 1)
+            if y == min_c.y or y == max_c.y or x == min_c.x or x == max_c.x:
+                for i in closest:
+                    infinite_areas[i] = True
+                continue
+            i = closest[0]
+            if not i in areas:
+                areas[i] = 1
+            else:
+                areas[i] += 1
+    for key in infinite_areas:
+        if key in areas:
+            del areas[key]
+    largest_area = max(areas.keys(), key=(lambda key: areas[key]))
+    print("Largest area has index {} and an area of: {}".format(largest_area, areas[largest_area]))
+    return areas[largest_area]
+
 class TestThis(unittest.TestCase):
     def test_dist(self):
         self.assertEqual(dist(Coord(10, 20), Coord(11, 2)), 1+18)
+        self.assertEqual(dist(Coord(10, 20), Coord(10, 20)), 0)
+    def test_find_largest_area(self):
+        coords = [
+            Coord(1, 1),
+            Coord(1, 6),
+            Coord(8, 3),
+            Coord(3, 4),
+            Coord(5, 5),
+            Coord(8, 9),
+        ]
+        self.assertEqual(find_largest_area(coords), 17)
 
 if __name__ == "__main__":
     #unittest.main()
@@ -51,30 +93,5 @@ if __name__ == "__main__":
     for line in lines:
         m = re.match(r"(\d+), (\d+)", line)
         coords.append(Coord(int(m.group(1)), int(m.group(2))))
-    print("Number of coords: {}".format(len(coords)))
-    (min_c, max_c) = min_max(coords)
-    width = max_c.x - min_c.x
-    height = max_c.y - min_c.y
-    print("Locations: {} x {} = {}".format(width, height, width * height))
-    areas = {}
-    infinite_areas = {}
-    for y in range(min_c.y, max_c.y + 1):
-        for x in range(min_c.x, max_c.x + 1):
-            closest = closest_coords(coords, Coord(x, y))
-            if y == min_c.y or y == max_c.y or x == min_c.x or x == max_c.x:
-                for i in closest:
-                    if not i in infinite_areas:
-                        print("Infinite area at {} {}: {}".format(x, y, i))
-                    infinite_areas[i] = True
-                continue
-            if len(closest) != 1:
-                continue
-            i = closest[0]
-            if not i in areas:
-                areas[i] = 1
-            else:
-                areas[i] += 1
-    for key in infinite_areas.keys():
-        del areas[key]
-    largest_area = max(areas.keys(), key=(lambda key: areas[key]))
-    print("Largest area has index {} and an area of: {}".format(largest_area, areas[largest_area]))
+    largest_area = find_largest_area(coords)
+    print("The answer to subproblem 1 is: {}".format(largest_area))
