@@ -5,32 +5,24 @@
 import unittest
 import collections
 import re
+from functools import reduce
 
 class Node:
     def __init__(self):
         self.children = []
         self.metadata = []
     def metadata_sum_this(self):
-        sum = 0
-        for i in self.metadata:
-            sum += i
-        return sum
+        return reduce(lambda sum, m: sum + m, self.metadata, 0)
     def metadata_sum_children(self):
-        sum = 0
-        for c in self.children:
-            sum += c.metadata_sum()
-        return sum
+        return reduce(lambda sum, c: sum + c.metadata_sum(), self.children, 0)
     def metadata_sum(self):
         return self.metadata_sum_this() + self.metadata_sum_children()
     def value(self):
-        if not self.children:
+        if self.children:
+            indexes = filter(lambda i: i > 0 and i <= len(self.children), self.metadata)
+            return reduce(lambda sum, i: sum + self.children[i - 1].value(), indexes, 0)
+        else:
             return self.metadata_sum_this()
-        sum = 0
-        for i in self.metadata:
-            if i > 0 and i <= len(self.children):
-                sum += self.children[i - 1].value()
-
-        return sum
 
 def string_as_ints(str):
     return [int(s) for s in str.split()]
