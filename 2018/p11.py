@@ -24,7 +24,7 @@ def square(cache, cx, cy, grid_serial):
             s += calc_power_level(cache, x, y, grid_serial)
     return s
 
-def solve(grid_serial):
+def solve1(grid_serial):
     cache = {}
     best_value = None
     best_xy = None
@@ -35,7 +35,7 @@ def solve(grid_serial):
                 best_value = s
                 best_xy = (cx - 1, cy - 1)
     print("Best: {} at {}".format(best_value, best_xy))
-    return best_value
+    return (best_xy, best_value)
 
 class TestThis(unittest.TestCase):
     def test_power_level(self):
@@ -43,10 +43,10 @@ class TestThis(unittest.TestCase):
         self.assertEqual(calc_power_level({}, 122, 79, 57), -5)
         self.assertEqual(calc_power_level({}, 217, 196, 39), 0)
         self.assertEqual(calc_power_level({}, 101, 153, 71), 4)
-    def test_solve(self):
-        self.assertEqual(solve(18), 29)
-        self.assertEqual(solve(42), 30)
+    def test_solve1(self):
+        self.assertEqual(solve1(18), ((33, 45), 29))
+        self.assertEqual(solve1(42), ((21, 61), 30))
 
 if __name__ == "__main__":
     #unittest.main()
-    solve(7672)
+    solve1(7672)
