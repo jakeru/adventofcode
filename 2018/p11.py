@@ -4,49 +4,47 @@
 
 import unittest
 
-def calc_power_level(cache, x, y, grid_serial):
-    id = "{}_{}".format(x, y)
-    if id in cache:
-        return cache[id]
+def calc_power_level(x, y, serial):
     rack_id = x + 10
     power_level = rack_id * y
-    power_level += grid_serial
+    power_level += serial
     power_level *= rack_id
     h = (power_level // 100) % 10
     value = h - 5
-    cache[id] = value
     return value
 
-def square(cache, cx, cy, grid_serial):
+def square(minx, miny, size, serial):
     s = 0
-    for y in range(cy - 1, cy + 2):
-        for x in range(cx - 1, cx + 2):
-            s += calc_power_level(cache, x, y, grid_serial)
+    for y in range(miny, miny + size):
+        for x in range(minx, minx + size):
+            s += calc_power_level(x, y, serial)
     return s
 
-def solve1(grid_serial):
-    cache = {}
+def solve1(serial):
     best_value = None
     best_xy = None
-    for cy in range(2, 300):
-        for cx in range(2, 300):
-            s = square(cache, cx, cy, grid_serial)
+    total_size = 300
+    square_size = 3
+    for miny in range(1, total_size - square_size + 1):
+        for minx in range(1, total_size - square_size + 1):
+            s = square(minx, miny, square_size, serial)
             if best_value is None or s > best_value:
                 best_value = s
-                best_xy = (cx - 1, cy - 1)
-    print("Best: {} at {}".format(best_value, best_xy))
+                best_xy = (minx, miny)
     return (best_xy, best_value)
 
 class TestThis(unittest.TestCase):
     def test_power_level(self):
-        self.assertEqual(calc_power_level({}, 3, 5, 8), 4)
-        self.assertEqual(calc_power_level({}, 122, 79, 57), -5)
-        self.assertEqual(calc_power_level({}, 217, 196, 39), 0)
-        self.assertEqual(calc_power_level({}, 101, 153, 71), 4)
+        self.assertEqual(calc_power_level(3, 5, 8), 4)
+        self.assertEqual(calc_power_level(122, 79, 57), -5)
+        self.assertEqual(calc_power_level(217, 196, 39), 0)
+        self.assertEqual(calc_power_level(101, 153, 71), 4)
     def test_solve1(self):
         self.assertEqual(solve1(18), ((33, 45), 29))
         self.assertEqual(solve1(42), ((21, 61), 30))
 
 if __name__ == "__main__":
     #unittest.main()
-    solve1(7672)
+    (p1, b1) = solve1(7672)
+    print("The answer to subproblem 1 is: {} ({})".format(",".join(map(lambda e: str(e), p1)), b1))
+    print("Use the solution written in C to solve subproblem 2.")
