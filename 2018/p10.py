@@ -104,8 +104,8 @@ class TestThis(unittest.TestCase):
             parse_star("position=< 6,  10> velocity=<-2, -1>"),
             Star(6, 10, -2, -1))
     def test_solve(self):
-        solve("p10_testdata.txt")
+        solve("p10_test_input.txt")
 
 if __name__ == "__main__":
     #unittest.main()
-    solve("p10/p10_input.txt")
+    solve("p10_input.txt")
