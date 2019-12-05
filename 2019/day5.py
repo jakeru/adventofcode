@@ -3,6 +3,7 @@
 # By Jakob Ruhe 2019-12-05
 # Started at 06:21
 # P1 solved at 06:57
+# P2 solved at 07:05
 
 import unittest
 
@@ -24,9 +25,8 @@ def fetch_parameters(memory, pc, modes, num):
     return params
 
 
-def execute(program):
+def execute(program, input):
     output = 0
-    input = 1
     memory = program.copy()
     pc = 0
     while True:
@@ -46,6 +46,26 @@ def execute(program):
             params = fetch_parameters(memory, pc, memory[pc] // 100, 1)
             output = params[0]
             pc += 2
+        elif op_code == 5:
+            params = fetch_parameters(memory, pc, memory[pc] // 100, 2)
+            if params[0]:
+                pc = params[1]
+            else:
+                pc += 3
+        elif op_code == 6:
+            params = fetch_parameters(memory, pc, memory[pc] // 100, 2)
+            if not params[0]:
+                pc = params[1]
+            else:
+                pc += 3
+        elif op_code == 7:
+            params = fetch_parameters(memory, pc, memory[pc] // 100, 3)
+            memory[memory[pc + 3]] = 1 if params[0] < params[1] else 0
+            pc += 4
+        elif op_code == 8:
+            params = fetch_parameters(memory, pc, memory[pc] // 100, 3)
+            memory[memory[pc + 3]] = 1 if params[0] == params[1] else 0
+            pc += 4
         elif op_code == 99:
             return output
         else:
@@ -56,22 +76,16 @@ def solve1():
     with open("input/day5.txt", "r") as f:
         input = f.read()
     program = parse_input(input)
-    result = execute(program)
+    result = execute(program, 1)
     print("{}".format(result))
 
 
 def solve2():
-    with open("input/day2.txt", "r") as f:
+    with open("input/day5.txt", "r") as f:
         input = f.read()
     program = parse_input(input)
-    for noun in range(0, 100):
-        for verb in range(0, 100):
-            program[1] = noun
-            program[2] = verb
-            memory = execute(program)
-            if memory[0] == 19690720:
-                print("Noun: {}, verb: {}, result: {}".format(noun, verb, noun * 100 + verb))
-                return
+    result = execute(program, 5)
+    print("{}".format(result))
 
 
 class TestThis(unittest.TestCase):
@@ -81,4 +95,5 @@ class TestThis(unittest.TestCase):
 
 if __name__ == "__main__":
     solve1()
+    solve2()
 
