@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-# By Jakob Ruhe 2019-12-08
-# Started at 06:50
-# P1 solved at 07:23
-# P2 solved at 07:54
+# By Jakob Ruhe (jakob.ruhe@gmail.com) 2019-12-08 at 06:50
 
 import unittest
 
