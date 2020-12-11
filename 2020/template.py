@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections import namedtuple
 
 def parse_input(input):
-    return input.strip().split("\n");
+    return input.strip().split("\n")
 
 def solve1(entries):
     pass
