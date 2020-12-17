@@ -15,98 +15,58 @@ from collections import namedtuple
 def parse_input(input):
     return input.strip().split("\n")
 
-def find_min_max(active, dims):
-    min_ = [None] * dims
-    max_ = [None] * dims
-    for c in active:
-        for i in range(dims):
-            min_[i] = c[i] if min_[i] is None else min(min_[i], c[i])
-            max_[i] = c[i] if max_[i] is None else max(max_[i], c[i])
-    return min_, max_
+def get_neighbor_locations(loc):
+    nbs = []
+    for z in range(-1, 2):
+        for y in range(-1, 2):
+            for x in range(-1, 2):
+                if len(loc) == 3 and (z != 0 or y != 0 or x != 0):
+                    nbs.append((loc[0] + x, loc[1] + y, loc[2] + z))
+                elif len(loc) == 4:
+                    for w in range(-1, 2):
+                        if z != 0 or y != 0 or x != 0 or w != 0:
+                            nbs.append((loc[0] + w, loc[1] + x, loc[2] + y, loc[3] + z))
+    return nbs
 
-def num_neighbors(coord, active):
-    num = 0
-    for z in range(0, 3):
-        for y in range(0, 3):
-            for x in range(0, 3):
-                if x == 1 and y == 1 and z == 1:
-                    continue
-                if (coord[0] + x - 1, coord[1] + y - 1, coord[2] + z - 1) in active:
-                    num += 1
-    return num
-
-def num_neighbors2(coord, active):
-    num = 0
-    for z in range(0, 3):
-        for y in range(0, 3):
-            for x in range(0, 3):
-                for w in range(0, 3):
-                    if w == 1 and x == 1 and y == 1 and z == 1:
-                        continue
-                    if (coord[0] + w - 1, coord[1] + x - 1, coord[2] + y - 1, coord[3] + z - 1) in active:
-                        num += 1
-    return num
-
-# If a cube is active and exactly 2 or 3 of its neighbors are also active, the
-# cube remains active. Otherwise, the cube becomes inactive. If a cube is
-# inactive but exactly 3 of its neighbors are active, the cube becomes active.
-# Otherwise, the cube remains inactive.
+def add_neighbors(loc, num_neighbors):
+    cubes = get_neighbor_locations(loc)
+    for c in cubes:
+        num_neighbors[c] += 1
 
 def simulate_step(active):
     next_active = set()
-    min_, max_ = find_min_max(active, 3)
-    for cz in range(min_[2] - 1, max_[2] + 2):
-        for cy in range(min_[1] - 1, max_[1] + 2):
-            for cx in range(min_[0] - 1, max_[0] + 2):
-                neighbors = num_neighbors((cx, cy, cz), active)
-                if (cx, cy, cz) in active:
-                    if neighbors == 2 or neighbors == 3:
-                        next_active.add((cx, cy, cz))
-                elif neighbors == 3:
-                    next_active.add((cx, cy, cz))
-    return next_active
-
-def simulate_step2(active):
-    dims = 4
-    next_active = set()
-    min_, max_ = find_min_max(active, dims)
-    for cz in range(min_[3] - 1, max_[3] + 2):
-        for cy in range(min_[2] - 1, max_[2] + 2):
-            for cx in range(min_[1] - 1, max_[1] + 2):
-                for cw in range(min_[0] - 1, max_[0] + 2):
-                    neighbors = num_neighbors2((cw, cx, cy, cz), active)
-                    if (cw, cx, cy, cz) in active:
-                        if neighbors == 2 or neighbors == 3:
-                            next_active.add((cw, cx, cy, cz))
-                    elif neighbors == 3:
-                        next_active.add((cw, cx, cy, cz))
+    num_neighbors = defaultdict(int)
+    for c in active:
+        add_neighbors(c, num_neighbors)
+    for c,num in num_neighbors.items():
+        is_active = c in active
+        if is_active and (num == 2 or num == 3):
+            next_active.add(c)
+        elif not is_active and num == 3:
+            next_active.add(c)
     return next_active
 
 # How many cubes are left in the active state after the sixth cycle?
-def solve1(entries):
+def solve(entries, dims):
     active = set()
     for y, row in enumerate(entries):
         for x, c in enumerate(row):
-            print(x, y, c)
             if c == "#":
-                active.add((x, y, 0))
-    print("active", active)
+                if dims == 3:
+                    active.add((x, y, 0))
+                elif dims == 4:
+                    active.add((0, x, y, 0))
+                else:
+                    raise ValueError("Dims must be 3 or 4")
     for step in range(6):
         active = simulate_step(active)
     return len(active)
 
+def solve1(entries):
+    return solve(entries, 3)
+
 def solve2(entries):
-    print("P2", "*"*80)
-    active = set()
-    for y, row in enumerate(entries):
-        for x, c in enumerate(row):
-            print(x, y, c)
-            if c == "#":
-                active.add((0, x, y, 0))
-    print("active", active)
-    for step in range(6):
-        active = simulate_step2(active)
-    return len(active)
+    return solve(entries, 4)
 
 # Execute tests with:
 # python3 -m unittest dayX
