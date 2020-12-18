@@ -31,5 +31,5 @@ if __name__ == "__main__":
     problem_name = os.path.splitext(os.path.basename(__file__))[0]
     with open(f"input/{problem_name}.txt") as f:
         entries = parse_input(f.read())
-    print(f"{solve1(entries)}")
-    print(f"{solve2(entries)}")
+    print(solve1(entries))
+    print(solve2(entries))
