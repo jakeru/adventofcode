@@ -43,7 +43,6 @@ def solve1(entries):
     count = 0
     for current_color, children in entries.items():
         if can_contain(entries, current_color, "shiny gold"):
-            print(f"{current_color} can contain shiny gold")
             count += 1
     return count
 
