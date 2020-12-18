@@ -54,6 +54,8 @@ def solve2(line):
     step, t0 = buses[0]
     for b in buses[1:]:
         t = solve_with_step(b, t0, step)
+        # Note: This works as long as the bus id:s are prime numbers, which they
+        # were in my case and I guess for others as well.
         step *= b[0]
         t0 = t
     return t
