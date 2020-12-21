@@ -23,55 +23,84 @@ def find_allergene_not_including(foods, allergene, ingrediens):
             return f
     return None
 
-def solve1(entries):
-    print("foods")
-    for f in entries:
-        print(f)
+def find_initial_possible_allergenes(foods):
     possible_allergenes = defaultdict(set)
-    for e in entries:
-        for i in e[0]:
-            for a in e[1]:
+    for f in foods:
+        for i in f[0]:
+            for a in f[1]:
                 possible_allergenes[i].add(a)
-    print("possible_allergenes")
-    for i,p in possible_allergenes.items():
-        print("-", i, ":", " ".join(p))
-    #print("possible_allergenes", possible_allergenes)
-    ingrediens_list = defaultdict(set)
-    for e in entries:
-        for i in e[0]:
-            for a in e[1]:
-                ingrediens_list[a].add(i)
-    print("ingrediens_list")
-    for a,i in ingrediens_list.items():
-        print("-", a, ":", " ".join(i))
-    table = {}
-    for i,p in possible_allergenes.items():
-        table[i] = [a in p for a in ingrediens_list]
-    print("table")
-    print("i", " ".join(ingrediens_list.keys()))
-    for i,t in table.items():
-        print("-", i, " ".join(map(str, t)))
+    return possible_allergenes
+
+def remove_impossible_allergenes1(foods, possible_allergenes):
     for i,p in possible_allergenes.items():
         remove = set()
         for a in p:
-            f = find_allergene_not_including(entries, a, i)
+            f = find_allergene_not_including(foods, a, i)
             if f is not None:
                 print("Removing allergene", a, "from ingrediens", i, "food", f)
                 remove.add(a)
         for a in remove:
             p.remove(a)
-    print("possible_allergenes after removal")
+
+def print_possible_allergenes(possible_allergenes):
     for i,p in possible_allergenes.items():
         print("-", i, ":", " ".join(p))
+
+def solve1(foods):
+    print("foods")
+    for f in foods:
+        print(f)
+    possible_allergenes = find_initial_possible_allergenes(foods)
+    print("possible_allergenes")
+    print_possible_allergenes(possible_allergenes)
+    remove_impossible_allergenes1(foods, possible_allergenes)
+    print("possible_allergenes after removal")
+    print_possible_allergenes(possible_allergenes)
     res = 0
-    for f in entries:
+    for f in foods:
         for a,p in possible_allergenes.items():
             res += not p and a in f[0]
     return res
 
+def remove_impossible_allergenes2(foods, possible_allergenes):
+    checked_allergenes = set()
+    while True:
+        remove_allergene = None
+        not_from_ingrediens = None
+        for i,p in possible_allergenes.items():
+            if not p:
+                continue
+            first_allergene = next(iter(p))
+            if len(p) == 1 and first_allergene not in checked_allergenes:
+                remove_allergene = first_allergene
+                not_from_ingrediens = i
+                break
+        if remove_allergene is None:
+            break
+        for i,p in possible_allergenes.items():
+            if i == not_from_ingrediens:
+                continue
+            if remove_allergene in p:
+                print("Removing allergene", remove_allergene, "from", i)
+                p.remove(remove_allergene)
+        checked_allergenes.add(remove_allergene)
 
-def solve2(entries):
-    pass
+def solve2(foods):
+    possible_allergenes = find_initial_possible_allergenes(foods)
+    remove_impossible_allergenes1(foods, possible_allergenes)
+    remove_impossible_allergenes2(foods, possible_allergenes)
+    print("possible_allergenes after removal step 2")
+    print_possible_allergenes(possible_allergenes)
+    dangerous = {}
+    for i,p in possible_allergenes.items():
+        assert len(p) <= 1
+        if len(p) == 1:
+            dangerous[i] = next(iter(p))
+    print("dangerous ingredienses")
+    for i,a in dangerous.items():
+        print("-", i, ":", a)
+    sorted_di = dict(sorted(dangerous.items(), key=lambda item: item[1]))
+    return ",".join(sorted_di.keys())
 
 # Execute tests with:
 # python3 -m unittest dayX
@@ -84,7 +113,7 @@ sqjhc mxmxvkd sbzzf (contains fish)
     def test1(self):
         self.assertEqual(solve1(parse_input(self.input)), 5)
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), "mxmxvkd,sqjhc,fvjkl")
 
 if __name__ == "__main__":
     problem_name = os.path.splitext(os.path.basename(__file__))[0]
