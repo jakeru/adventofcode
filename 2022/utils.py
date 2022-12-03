@@ -32,6 +32,13 @@ def turn_right(d):
     return (d - 1) % len(DIRS)
 
 
+def split_into_groups(items, group_size):
+    num = len(items)
+    if num % group_size != 0:
+        raise ValueError(f"# items ({num}) is not a multiple of {group_size}")
+    return [items[i:i + group_size] for i in range(0, num, group_size)]
+
+
 def parse_ints(string):
     groups = re.findall(r"-?\d+", string)
     return tuple(map(int, groups))
@@ -49,6 +56,11 @@ class TestThis(unittest.TestCase):
         self.assertEqual(turn_right(dir_from_name("W")), dir_from_name("N"))
         self.assertEqual(turn_right(dir_from_name("S")), dir_from_name("W"))
         self.assertEqual(turn_right(dir_from_name("E")), dir_from_name("S"))
+
+    def test_split_into_groups(self):
+        self.assertEqual(split_into_groups((1, 2, 3, 4), 2), [(1, 2), (3, 4)])
+        with self.assertRaises(ValueError):
+            split_into_groups((1, 2, 3, 4), 3)
 
     def test_parse_ints(self):
         self.assertEqual(parse_ints(""), ())
