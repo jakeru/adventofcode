@@ -44,6 +44,11 @@ def parse_ints(string):
     return tuple(map(int, groups))
 
 
+def parse_unsigned_ints(string):
+    groups = re.findall(r"\d+", string)
+    return tuple(map(int, groups))
+
+
 # Execute tests with:
 # python3 -m unittest utils
 class TestThis(unittest.TestCase):
@@ -68,3 +73,9 @@ class TestThis(unittest.TestCase):
         self.assertEqual(parse_ints("123"), (123,))
         self.assertEqual(parse_ints("123,-456,789"), (123, -456, 789))
         self.assertEqual(parse_ints("hello12,3world 4567."), (12, 3, 4567))
+
+    def test_parse_unsigned_ints(self):
+        self.assertEqual(parse_unsigned_ints(""), ())
+        self.assertEqual(parse_unsigned_ints("no digits"), ())
+        self.assertEqual(parse_unsigned_ints("123,-456,789"), (123, 456, 789))
+        self.assertEqual(parse_unsigned_ints("2-6,4-8"), (2, 6, 4, 8))
