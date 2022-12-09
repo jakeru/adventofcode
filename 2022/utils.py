@@ -3,9 +3,12 @@
 # Random utility functions by Jakob Ruhe
 
 import unittest
+from collections import namedtuple
 import re
 
-DIRS = ("N", "W", "S", "E")
+DIRS = ("U", "L", "D", "R")
+
+Point = namedtuple("Point", ["x", "y"])
 
 
 def dir_from_name(name):
@@ -36,7 +39,7 @@ def split_into_groups(items, group_size):
     num = len(items)
     if num % group_size != 0:
         raise ValueError(f"# items ({num}) is not a multiple of {group_size}")
-    return [items[i:i + group_size] for i in range(0, num, group_size)]
+    return [items[i : i + group_size] for i in range(0, num, group_size)]
 
 
 def parse_ints(string):
