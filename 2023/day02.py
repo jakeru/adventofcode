@@ -2,74 +2,58 @@
 
 # By Jakob Ruhe 2023-12-02
 
-# Wrong: 2402
-# Right: 2162
-
 import os
-import re
+import math
 import unittest
 from collections import defaultdict
-from collections import namedtuple
-import utils
 
-Show = namedtuple('Show', ['num', 'color'])
 
 def parse_input(input):
     return input.strip().split("\n")
 
-def parse_game(line):
-    g1, g2 = line.split(':')
-    print(g1, g2)
-    subsets = g2.strip().split(';')
-    print(subsets)
-    subsets_out = []
-    for subset in subsets:
-        show_out = defaultdict(int)
-        print(f"subset: {subset}")
-        for show in subset.split(','):
-            print(f"show: {show}")
-            num, color = show.strip().split()
-            show_out[color] += int(num)
-        subsets_out.append(show_out)
-    print(subsets_out)
-    return subsets_out
 
-def solve1(entries):
-    possible = []
-    for i, line in enumerate(entries):
-        subsets = parse_game(line)
-        subset_possible = True
-        for subset in subsets:
-            print(f'subset: {subset}')
-            if subset.get('red', 0) > 12:
-                subset_possible = False
-            if subset.get('green', 0) > 13:
-                subset_possible = False
-            if subset.get('blue', 0) > 14:
-                subset_possible = False
-        print(f'{i + 1}: {subset_possible}')
-        if subset_possible:
-            possible.append(i + 1)
+def parse_line(line):
+    _, subsets_str = line.split(":")
+    subsets = []
+    for subset in subsets_str.strip().split(";"):
+        shows = defaultdict(int)
+        for show in subset.split(","):
+            num, color = show.strip().split()
+            shows[color] += int(num)
+        subsets.append(shows)
+    return subsets
+
+
+def is_possible_game(max_possible, subsets):
+    for subset in subsets:
+        for k, v in max_possible.items():
+            if subset.get(k, 0) > v:
+                return False
+    return True
+
+
+def solve1(lines):
+    max_possible = {"red": 12, "green": 13, "blue": 14}
+    possible = [
+        i + 1
+        for i, line in enumerate(lines)
+        if is_possible_game(max_possible, parse_line(line))
+    ]
     return sum(possible)
 
 
 def power_of_game(subsets):
+    colors = ("red", "green", "blue")
     subset_min = defaultdict(int)
     for subset in subsets:
-        subset_min['red'] = max(subset_min['red'], subset.get('red', 0))
-        subset_min['green'] = max(subset_min['green'], subset.get('green', 0))
-        subset_min['blue'] = max(subset_min['blue'], subset.get('blue', 0))
-    return subset_min['red'] * subset_min['green'] * subset_min['blue']
+        for color in colors:
+            subset_min[color] = max(subset_min[color], subset.get(color, 0))
+    return math.prod(subset_min.values())
 
 
-def solve2(entries):
-    power_sum = 0
-    for i, line in enumerate(entries):
-        subsets = parse_game(line)
-        power = power_of_game(subsets)
-        print(f'{i + 1}: {power}')
-        power_sum += power
-    return power_sum
+def solve2(lines):
+    return sum([power_of_game(parse_line(line)) for line in lines])
+
 
 # Execute tests with:
 # python3 -m unittest dayX
