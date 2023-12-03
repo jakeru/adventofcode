@@ -52,9 +52,38 @@ def solve1(entries):
                     print(f"Found {num} at {x}, {y}, without neighbors")
     return sum
 
+def find_gears(start, grid):
+    x, y = start
+    gears = set()
+    while grid.get(Point(x, y), '.').isdigit():
+        neighbors = find_all_neighbors(Point(x, y))
+        for nb in neighbors:
+            c = grid.get(nb, '.')
+            if c == '*':
+                gears.add(nb)
+        x += 1
+    return gears
 
 def solve2(entries):
-    pass
+    grid = {}
+    for y, line in enumerate(entries):
+        for x, c in enumerate(line.strip()):
+            grid[(x, y)] = c
+    all_gears = defaultdict(list)
+    for y in range(len(entries)):
+        for x in range(len(entries[0])):
+            c = grid.get(Point(x, y), '.')
+            if c.isdigit() and not grid.get(Point(x - 1, y), '.').isdigit():
+                if gears := find_gears(Point(x, y), grid):
+                    for g in gears:
+                        all_gears[g].append(get_num(Point(x, y), grid))
+    sum = 0
+    for gear, numbers in all_gears.items():
+        print(f"gear {gear}, numbers: {numbers}")
+        if len(numbers) == 2:
+            sum += numbers[0] * numbers[1]
+    return sum
+
 
 
 # Execute tests with:
@@ -77,7 +106,7 @@ class TestThis(unittest.TestCase):
         self.assertEqual(solve1(parse_input(self.input)), 4361)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 467835)
 
 
 if __name__ == "__main__":
