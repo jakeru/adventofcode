@@ -3,10 +3,8 @@
 # By Jakob Ruhe 2023-12-04
 
 import os
-import re
 import unittest
 from collections import defaultdict
-from collections import namedtuple
 import utils
 
 
@@ -14,36 +12,35 @@ def parse_input(input):
     return input.strip().split("\n")
 
 
-# Wrong: 8320
-# Wrong: 55508
+def parse_line(line):
+    _, all_cards = line.split(":")
+    winning, cards = all_cards.split("|")
+    return utils.parse_ints(winning), utils.parse_ints(cards)
+
+
+def num_matching(winning, cards):
+    return len(list(filter(lambda c: c in winning, cards)))
+
 
 def solve1(entries):
     total = 0
     for line in entries:
-        w, c = line.split('|')
-        _, w = w.split(':')
-        winning = utils.parse_ints(w)
-        cards = utils.parse_ints(c)
-        print(f'winning {winning}')
-        print(f'cards {cards}')
-        points = 0
-        p = 1
-        num_won = 0
-        for c in cards:
-            if c in winning:
-                num_won += 1
-                points += p
-                p *= 2
-                print(f"card {c} match")
-        # total += points
-        if num_won > 0:
-            total += 2 ** (num_won - 1)
-            print(f"{num_won} wins gives {2 ** num_won} points")
+        winning, cards = parse_line(line)
+        if (num_won := num_matching(winning, cards)) > 0:
+            points = 2 ** (num_won - 1)
+            total += points
     return total
 
 
 def solve2(entries):
-    pass
+    num_cards = defaultdict(int)
+    for i, line in enumerate(entries):
+        num_cards[i] += 1
+        winning, cards = parse_line(line)
+        num_won = num_matching(winning, cards)
+        for j in range(num_won):
+            num_cards[j + i + 1] += num_cards[i]
+    return sum(num_cards.values())
 
 
 # Execute tests with:
@@ -62,7 +59,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
         self.assertEqual(solve1(parse_input(self.input)), 13)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 30)
 
 
 if __name__ == "__main__":
