@@ -3,66 +3,62 @@
 # By Jakob Ruhe 2023-12-03
 
 import os
-import re
 import unittest
 from collections import defaultdict
-from collections import namedtuple
-import utils
-from utils import find_all_neighbors, Point
+from utils import Point, all_adjacent
+
 
 def parse_input(input):
     return input.strip().split("\n")
 
-def has_neighbor(location, grid):
-    x, y = location
-    while grid.get((x, y), '.').isdigit():
-        neighbors = find_all_neighbors(Point(x, y))
+
+def has_number_neighbor_sym(location, grid):
+    while grid.get(location, ".").isdigit():
+        neighbors = all_adjacent(location)
         for nb in neighbors:
-            c = grid.get(nb, '.')
-            if c != '.' and not c.isdigit():
+            c = grid.get(nb, ".")
+            if c != "." and not c.isdigit():
                 return True
-        x += 1
+        location = Point(location.x + 1, location.y)
     return False
 
 
 def get_num(location, grid):
     num = []
-    x, y = location
-    while grid.get(Point(x, y), '.').isdigit():
-        num.append(grid.get(Point(x, y)))
-        x += 1
+    while grid.get(location, ".").isdigit():
+        num.append(grid.get(location))
+        location = Point(location.x + 1, location.y)
     return int("".join(num))
+
 
 def solve1(entries):
     grid = {}
     for y, line in enumerate(entries):
         for x, c in enumerate(line.strip()):
-            grid[(x, y)] = c
+            grid[Point(x, y)] = c
     sum = 0
     for y in range(len(entries)):
         for x in range(len(entries[0])):
-            c = grid.get(Point(x, y), '.')
-            if c.isdigit() and not grid.get(Point(x - 1, y), '.').isdigit():
-                if has_neighbor(Point(x, y), grid):
+            c = grid.get(Point(x, y), ".")
+            if c.isdigit() and not grid.get(Point(x - 1, y), ".").isdigit():
+                if has_number_neighbor_sym(Point(x, y), grid):
                     num = get_num(Point(x, y), grid)
-                    print(f"Found {num} at {x}, {y}, adding it to sum")
                     sum += num
-                else:
-                    num = get_num(Point(x, y), grid)
-                    print(f"Found {num} at {x}, {y}, without neighbors")
     return sum
+
 
 def find_gears(start, grid):
     x, y = start
     gears = set()
-    while grid.get(Point(x, y), '.').isdigit():
-        neighbors = find_all_neighbors(Point(x, y))
+    while grid.get(Point(x, y), ".").isdigit():
+        neighbors = all_adjacent(Point(x, y))
         for nb in neighbors:
-            c = grid.get(nb, '.')
-            if c == '*':
+            c = grid.get(nb, ".")
+            if c == "*":
                 gears.add(nb)
         x += 1
     return gears
+
 
 def solve2(entries):
     grid = {}
@@ -72,18 +68,16 @@ def solve2(entries):
     all_gears = defaultdict(list)
     for y in range(len(entries)):
         for x in range(len(entries[0])):
-            c = grid.get(Point(x, y), '.')
-            if c.isdigit() and not grid.get(Point(x - 1, y), '.').isdigit():
+            c = grid.get(Point(x, y), ".")
+            if c.isdigit() and not grid.get(Point(x - 1, y), ".").isdigit():
                 if gears := find_gears(Point(x, y), grid):
                     for g in gears:
                         all_gears[g].append(get_num(Point(x, y), grid))
     sum = 0
     for gear, numbers in all_gears.items():
-        print(f"gear {gear}, numbers: {numbers}")
         if len(numbers) == 2:
             sum += numbers[0] * numbers[1]
     return sum
-
 
 
 # Execute tests with:
