@@ -10,8 +10,10 @@ from collections import namedtuple
 import utils
 from functools import cmp_to_key
 
+
 def parse_input(input):
     return input.strip().split("\n")
+
 
 # 0 nothing
 # 1 one pair
@@ -21,9 +23,11 @@ def parse_input(input):
 # 5 four of a kind
 # 6 five of a kind
 
+
 def card_value(c):
     cards = "23456789TJQKA"
     return cards.index(c) + 2
+
 
 def type_of_hand(hand):
     count = defaultdict(int)
@@ -62,7 +66,6 @@ def compare(bh1, bh2):
     raise ValueError()
 
 
-
 def solve1(entries):
     card_bets = []
     for line in entries:
@@ -73,13 +76,91 @@ def solve1(entries):
     print(sorted_card_bets)
     total = 0
     for i, hand_bet in enumerate(sorted_card_bets):
-        rank = i + 1
         total += (i + 1) * hand_bet[1]
     return total
 
 
+def card_value2(c):
+    cards = "J23456789TQKA"
+    return cards.index(c) + 1
+
+
+def type_of_hand2(hand):
+    count = defaultdict(int)
+    for h in hand:
+        count[h] += 1
+    num_jokers = count["J"]
+    if 5 in count.values():
+        return 6
+    elif 4 in count.values():
+        if num_jokers == 1 or num_jokers == 4:
+            return 6
+        else:
+            assert num_jokers == 0
+            return 5
+    elif 3 in count.values() and 2 in count.values():
+        if num_jokers == 3 or num_jokers == 2:
+            return 6
+        else:
+            assert num_jokers == 0
+            return 4
+    elif 3 in count.values():
+        if num_jokers == 1 or num_jokers == 3:
+            return 5
+        else:
+            assert num_jokers == 0
+            return 3
+    elif len([c for c in count.values() if c == 2]) == 2:
+        if num_jokers == 2:
+            return 5
+        elif num_jokers == 1:
+            return 4
+        else:
+            assert num_jokers == 0
+            return 2
+    elif 2 in count.values():
+        if num_jokers == 2:
+            return 3
+        elif num_jokers == 1:
+            return 3
+        else:
+            assert num_jokers == 0
+            return 1
+    elif num_jokers == 1:
+        return 1
+    else:
+        return 0
+
+
+def compare2(bh1, bh2):
+    h1 = bh1[0]
+    h2 = bh2[0]
+    t1 = type_of_hand2(h1)
+    t2 = type_of_hand2(h2)
+    if t1 < t2:
+        return -1
+    elif t1 > t2:
+        return 1
+    for c1, c2 in zip(h1, h2):
+        if card_value2(c1) < card_value2(c2):
+            return -1
+        elif card_value2(c1) > card_value2(c2):
+            return 1
+    raise ValueError()
+
+
 def solve2(entries):
-    pass
+    card_bets = []
+    for line in entries:
+        c, b = line.split()
+        card_bets.append((c, int(b)))
+    print(card_bets)
+    sorted_card_bets = sorted(card_bets, key=cmp_to_key(compare2))
+    print(sorted_card_bets)
+    total = 0
+    for i, hand_bet in enumerate(sorted_card_bets):
+        total += (i + 1) * hand_bet[1]
+    return total
 
 
 # Execute tests with:
@@ -97,7 +178,7 @@ QQQJA 483
         self.assertEqual(solve1(parse_input(self.input)), 6440)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 5905)
 
 
 if __name__ == "__main__":
