@@ -31,9 +31,21 @@ def solve1(entries):
         total += num
     return total
 
+def get_prev(numbers):
+    if all(n == 0 for n in numbers):
+        return 0
+    next_gen = []
+    for i in range(1, len(numbers)):
+        next_gen.append(numbers[i] - numbers[i-1])
+    return numbers[0] - get_prev(next_gen)
 
 def solve2(entries):
-    pass
+    total = 0
+    for line in entries:
+        numbers = [int(w) for w in line.split()]
+        num = get_prev(numbers)
+        total += num
+    return total
 
 
 # Execute tests with:
@@ -49,7 +61,7 @@ class TestThis(unittest.TestCase):
         self.assertEqual(solve1(parse_input(self.input)), 114)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 2)
 
 
 if __name__ == "__main__":
