@@ -3,13 +3,12 @@
 # By Jakob Ruhe 2023-12-11
 
 import os
-import re
 import unittest
-from collections import defaultdict
 from collections import namedtuple
-import utils
-from utils import Point
 import itertools
+
+
+Point = namedtuple("Point", ["x", "y"])
 
 
 def parse_input(input):
@@ -17,18 +16,18 @@ def parse_input(input):
 
 
 def expand_rows(grid, add):
-    w = max([p.x for p in grid.keys()]) + 1
-    h = max([p.y for p in grid.keys()]) + 1
+    grid_out = set()
+    rows = {}
+    for p in grid:
+        if not p.y in rows:
+            rows[p.y] = []
+        rows[p.y].append(p)
+    h = max([p.y for p in grid]) + 1
     dy = 0
-    grid_out = {}
     for y in range(h):
-        found = []
-        for x in range(w):
-            if grid.get(Point(x, y)):
-                found.append(Point(x, y))
-        if found:
-            for p in found:
-                grid_out[Point(p.x, dy)] = "#"
+        if y in rows:
+            for p in rows[y]:
+                grid_out.add(Point(p.x, dy))
             dy += 1
         else:
             dy += add
@@ -36,85 +35,52 @@ def expand_rows(grid, add):
 
 
 def expand_cols(grid, add):
-    w = max([p.x for p in grid.keys()]) + 1
-    dx = 0
-    grid_out = {}
+    grid_out = set()
     cols = {}
     for p in grid:
         if not p.x in cols:
             cols[p.x] = []
         cols[p.x].append(p)
+    w = max([p.x for p in grid]) + 1
+    dx = 0
     for x in range(w):
         if x in cols:
             for p in cols[x]:
-                grid_out[Point(dx, p.y)] = "#"
+                grid_out.add(Point(dx, p.y))
             dx += 1
         else:
             dx += add
     return grid_out
 
 
-def draw_grid(grid):
-    w = max([p.x for p in grid.keys()]) + 1
-    h = max([p.y for p in grid.keys()]) + 1
-    for y in range(h):
-        line = []
-        for x in range(w):
-            if grid.get(Point(x, y)):
-                line.append("#")
-            else:
-                line.append(".")
-        print("".join(line))
+def build_grid(entries):
+    grid = set()
+    for y, line in enumerate(entries):
+        for x, c in enumerate(line):
+            if c == "#":
+                grid.add(Point(x, y))
+    return grid
+
+
+def solve(entries, expand):
+    grid = build_grid(entries)
+    stars = list(expand_cols(expand_rows(grid, expand), expand))
+    combinations = set(itertools.combinations(range(len(stars)), 2))
+    distances = []
+    for c in combinations:
+        p1 = stars[c[0]]
+        p2 = stars[c[1]]
+        dist = abs(p1.x - p2.x) + abs(p1.y - p2.y)
+        distances.append(dist)
+    return sum(distances)
 
 
 def solve1(entries):
-    y = 0
-    grid = {}
-    for y, line in enumerate(entries):
-        for x, c in enumerate(line):
-            if c == "#":
-                grid[Point(x, y)] = "#"
-    draw_grid(grid)
-    egrid = expand_cols(expand_rows(grid, 2), 2)
-    print("Expanded:")
-    draw_grid(egrid)
-    stars = list(egrid.keys())
-    print(stars)
-    combinations = set(itertools.combinations(range(len(stars)), 2))
-    print(combinations)
-    print(len(combinations))
-    distances = []
-    for c in combinations:
-        p1 = stars[c[0]]
-        p2 = stars[c[1]]
-        dist = abs(p1.x - p2.x) + abs(p1.y - p2.y)
-        print(f"Distances between {c[0] + 1} and {c[1] + 1}: {dist}")
-        distances.append(dist)
-    return sum(distances)
+    return solve(entries, 2)
 
 
-
-def solve2(entries, expand):
-    y = 0
-    grid = {}
-    for y, line in enumerate(entries):
-        for x, c in enumerate(line):
-            if c == "#":
-                grid[Point(x, y)] = "#"
-    egrid = expand_cols(expand_rows(grid, expand), expand)
-    stars = list(egrid.keys())
-    print(stars)
-    combinations = set(itertools.combinations(range(len(stars)), 2))
-    print(combinations)
-    print(len(combinations))
-    distances = []
-    for c in combinations:
-        p1 = stars[c[0]]
-        p2 = stars[c[1]]
-        dist = abs(p1.x - p2.x) + abs(p1.y - p2.y)
-        print(f"Distances between {c[0] + 1} and {c[1] + 1}: {dist}")
-        distances.append(dist)
-    return sum(distances)
+def solve2(entries):
+    return solve(entries, 1000000)
 
 
 # Execute tests with:
@@ -137,8 +103,8 @@ class TestThis(unittest.TestCase):
         self.assertEqual(solve1(parse_input(self.input)), 374)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input), 10), 1030)
-        self.assertEqual(solve2(parse_input(self.input), 100), 8410)
+        self.assertEqual(solve(parse_input(self.input), 10), 1030)
+        self.assertEqual(solve(parse_input(self.input), 100), 8410)
 
 
 if __name__ == "__main__":
@@ -146,4 +112,4 @@ if __name__ == "__main__":
     with open(f"input/{problem_name}.txt") as f:
         entries = parse_input(f.read())
     print(solve1(entries))
-    print(solve2(entries, 1000000))
+    print(solve2(entries))
