@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
-# By Jakob Ruhe 2023-12-
+# By Jakob Ruhe 2023-12-06
 
 import os
-import re
 import unittest
-from collections import defaultdict
-from collections import namedtuple
-import utils
 import math
 
 
@@ -15,27 +11,32 @@ def parse_input(input):
     return input.strip().split("\n")
 
 
-def num_ways_to_win(total_time, min_dist):
-    distances = []
-    for t in range(total_time):
-        distance = t * (total_time - t)
-        distances.append(distance)
-    return len(tuple(d for d in distances if d > min_dist))
+def num_winning_ways(total_time, min_dist):
+    # Equation to solve:
+    # t * (total_time - t) > min_dist
+    half_time = total_time / 2
+    A = math.sqrt(math.pow(half_time, 2) - min_dist)
+    t1 = half_time - A
+    t2 = half_time + A
+    eps = 1e-6
+    tt1 = math.ceil(t1 + eps)
+    tt2 = math.floor(t2 - eps)
+    return int(tt2 - tt1) + 1
 
 
 def solve1(entries):
-    times = tuple(int(w) for w in entries[0].split(':')[1].split())
-    distances = tuple(int(w) for w in entries[1].split(':')[1].split())
-    print(f"times {times}")
-    print(f"distances {distances}")
+    times = tuple(int(w) for w in entries[0].split(":")[1].split())
+    distances = tuple(int(w) for w in entries[1].split(":")[1].split())
     num_ways = []
-    for i, t in enumerate(times):
-        num_ways.append(num_ways_to_win(t, distances[i]))
+    for t, d in zip(times, distances):
+        num_ways.append(num_winning_ways(t, d))
     return math.prod(num_ways)
 
 
 def solve2(entries):
-    pass
+    total_time = int("".join(filter(str.isdigit, entries[0])))
+    min_dist = int("".join(filter(str.isdigit, entries[1])))
+    return num_winning_ways(total_time, min_dist)
 
 
 # Execute tests with:
@@ -47,10 +48,10 @@ Distance:  9  40  200
 """
 
     def test1(self):
-        self.assertEqual(solve1(parse_input(self.input)), None)
+        self.assertEqual(solve1(parse_input(self.input)), 288)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 71503)
 
 
 if __name__ == "__main__":
