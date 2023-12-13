@@ -16,42 +16,52 @@ def parse_input(input):
 
 
 def is_mirror_at_x(grid, x, w, h):
+    num_wrong = 0
     for i in range(w):
         for y in range(h):
-            p1 = Point(x - i, y)
-            p2 = Point(x + i - 1, y)
+            p1 = Point(x - i - 1, y)
+            p2 = Point(x + i, y)
             g1 = grid.get(p1)
             g2 = grid.get(p2)
             if g1 is not None and g2 is not None and g1 != g2:
-                return False
-    print(f"Found mirror at x: {x}")
-    return True
+                num_wrong += 1
+    if num_wrong == 0:
+        print(f"Found mirror at x: {x}")
+    elif num_wrong == 1:
+        print(f"Found smudge mirror at x: {x}")
+    return num_wrong
 
 
 def is_mirror_at_y(grid, y, w, h):
+    num_wrong = 0
     for i in range(h):
         for x in range(w):
-            p1 = Point(x, y - i)
-            p2 = Point(x, y + i - 1)
+            p1 = Point(x, y - i - 1)
+            p2 = Point(x, y + i)
             g1 = grid.get(p1)
             g2 = grid.get(p2)
             if g1 is not None and g2 is not None and g1 != g2:
-                return False
-    print(f"Found mirror at y: {y}")
-    return True
+                num_wrong += 1
+    if num_wrong == 0:
+        print(f"Found mirror at y: {y}")
+    elif num_wrong == 1:
+        print(f"Found smudge mirror at y: {y}")
+    else:
+        print(f"Found no mirror at y: {y} num_wrong: {num_wrong}")
+    return num_wrong
 
 
-def find_mirrors_in_grid(grid):
+def find_mirrors_in_grid(grid, num_smudged):
     w = max([p.x for p in grid.keys()]) + 1
     h = max([p.y for p in grid.keys()]) + 1
     total = 0
 
     for x in range(1, w):
-        if is_mirror_at_x(grid, x, w, h):
+        if is_mirror_at_x(grid, x, w, h) == num_smudged:
             total += x
 
     for y in range(1, h):
-        if is_mirror_at_y(grid, y, w, h):
+        if is_mirror_at_y(grid, y, w, h) == num_smudged:
             total += 100 * y
 
     return total
@@ -87,14 +97,36 @@ def solve1(entries):
     for grid in patterns:
         print("A grid:")
         print_grid(grid)
-        total += find_mirrors_in_grid(grid)
+        total += find_mirrors_in_grid(grid, 0)
         print("")
 
     return total
 
 
 def solve2(entries):
-    pass
+    patterns = []
+    grid = {}
+    y = 0
+    for line in entries:
+        if not line:
+            y = 0
+            patterns.append(grid)
+            grid = {}
+            continue
+        for x, c in enumerate(line):
+            grid[Point(x, y)] = c
+        y += 1
+    if grid:
+        patterns.append(grid)
+
+    total = 0
+    for grid in patterns:
+        print("A grid:")
+        print_grid(grid)
+        total += find_mirrors_in_grid(grid, 1)
+        print("")
+
+    return total
 
 
 # Execute tests with:
@@ -122,7 +154,7 @@ class TestThis(unittest.TestCase):
         self.assertEqual(solve1(parse_input(self.input)), 405)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.input)), None)
+        self.assertEqual(solve2(parse_input(self.input)), 400)
 
 
 if __name__ == "__main__":
