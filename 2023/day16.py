@@ -15,19 +15,9 @@ def inside(pos, w, h):
     return pos.x >= 0 and pos.x < w and pos.y >= 0 and pos.y < h
 
 
-def solve1(entries):
-    w = len(entries[0])
-    h = len(entries)
-    grid = {}
+def start_beam_at(grid, w, h, start, dir):
     energized = {}
-    for y, line in enumerate(reversed(entries)):
-        for x, c in enumerate(line):
-            if c != ".":
-                grid[Point(x, y)] = c
-
-    beams = []
-    beams.append((Point(-1, h - 1), "E"))
-
+    beams = [(start, dir)]
     while beams:
         beam = beams.pop()
         pos, dir = beam
@@ -81,8 +71,34 @@ def solve1(entries):
     return len(energized)
 
 
+def parse_grid(entries):
+    w = len(entries[0])
+    h = len(entries)
+    grid = {}
+    for y, line in enumerate(reversed(entries)):
+        for x, c in enumerate(line):
+            if c != ".":
+                grid[Point(x, y)] = c
+    return grid, w, h
+
+
+def solve1(entries):
+    grid, w, h = parse_grid(entries)
+    return start_beam_at(grid, w, h, Point(-1, h - 1), "E")
+
+
 def solve2(entries):
-    pass
+    grid, w, h = parse_grid(entries)
+    max_energized = 0
+    for x in range(w):
+        num1 = start_beam_at(grid, w, h, Point(x, -1), "N")
+        num2 = start_beam_at(grid, w, h, Point(x, h), "S")
+        max_energized = max(max_energized, num1, num2)
+    for y in range(h):
+        num1 = start_beam_at(grid, w, h, Point(-1, y), "E")
+        num2 = start_beam_at(grid, w, h, Point(w, y), "W")
+        max_energized = max(max_energized, num1, num2)
+    return max_energized
 
 
 # Execute tests with:
@@ -97,7 +113,7 @@ class TestThis(unittest.TestCase):
         self.assertEqual(solve1(parse_input(self.read_input())), 46)
 
     def test2(self):
-        self.assertEqual(solve2(parse_input(self.read_input())), None)
+        self.assertEqual(solve2(parse_input(self.read_input())), 51)
 
 
 if __name__ == "__main__":
