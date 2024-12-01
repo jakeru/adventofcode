@@ -39,7 +39,7 @@ def dir_y(d):
     return DIRS_XY[d][1]
 
 
-def walk(pos, dir, steps = 1):
+def walk(pos, dir, steps=1):
     return Point(pos.x + dir_x(dir) * steps, pos.y + dir_y(dir) * steps)
 
 

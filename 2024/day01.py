@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
-# By Jakob Ruhe 2024-12-dd
+# By Jakob Ruhe 2024-12-01
 
 import os
-import re
 import unittest
 import sys
-from collections import defaultdict
-from collections import namedtuple
 import utils
 import aocd
 
@@ -17,44 +14,22 @@ def parse_input(input):
 
 
 def solve_a(entries):
-    a = []
-    b = []
-    for line in entries:
-        #d = utils.parse_digits(line)
-        d = utils.parse_ints(line)
-        a.append(d[0])
-        b.append(d[1])
-        # a.append(int(d[0]))
-        # b.append(int(d[1]))
-    print(a)
-    print(b)
-    a = sorted(a)
-    b = sorted(b)
-    diffs = []
-    for i in range(len(a)):
-        diffs.append(abs(a[i] - b[i]))
+    numbers = [utils.parse_ints(e) for e in entries]
+    a = sorted([e[0] for e in numbers])
+    b = sorted([e[1] for e in numbers])
+    diffs = [abs(aa - bb) for (aa, bb) in zip(a, b)]
     return sum(diffs)
 
 
 def solve_b(entries):
-    a = []
-    b = []
-    for line in entries:
-        d = utils.parse_ints(line)
-        a.append(d[0])
-        b.append(d[1])
-    print(a)
-    print(b)
-    a = sorted(a)
-    b = sorted(b)
-    diffs = []
-    for i in range(len(a)):
-        num = 0
-        for ii in range(len(a)):
-            if b[ii] == a[i]:
-                num += 1
-        diffs.append(a[i] * num)
-    return sum(diffs)
+    numbers = [utils.parse_ints(e) for e in entries]
+    a = [e[0] for e in numbers]
+    b = [e[1] for e in numbers]
+    prods = []
+    for aa in a:
+        num = sum(int(aa == bb) for bb in b)
+        prods.append(aa * num)
+    return sum(prods)
 
 
 # Execute tests with:
@@ -70,10 +45,10 @@ class TestThis(unittest.TestCase):
 """
 
     def test_a(self):
-        self.assertEqual(solve_a(parse_input(self.input)), None)
+        self.assertEqual(solve_a(parse_input(self.input)), 11)
 
     def test_b(self):
-        self.assertEqual(solve_b(parse_input(self.input)), None)
+        self.assertEqual(solve_b(parse_input(self.input)), 31)
 
 
 if __name__ == "__main__":
