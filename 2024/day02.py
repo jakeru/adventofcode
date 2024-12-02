@@ -6,8 +6,11 @@ import os
 import unittest
 import sys
 
+# https://github.com/wimglenn/advent-of-code-data
+# pip install advent-of-code-data
 import aocd
 
+# Local module
 import utils
 
 
@@ -48,8 +51,8 @@ def solve_a(entries):
 
 def solve_b(entries):
     num_safe = 0
-    for e in entries:
-        report = utils.parse_ints(e)
+    reports = [utils.parse_ints(e) for e in entries]
+    for report in reports:
         if is_safe(report):
             num_safe += 1
             continue

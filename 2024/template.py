@@ -8,9 +8,13 @@ import unittest
 import sys
 from collections import defaultdict
 from collections import namedtuple
-import utils
+
+# https://github.com/wimglenn/advent-of-code-data
+# pip install advent-of-code-data
 import aocd
 
+# Local module
+import utils
 
 def parse_input(input):
     return input.strip().split("\n")
