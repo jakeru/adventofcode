@@ -22,19 +22,16 @@ def solve_a(entries):
 
 
 def solve_b(entries):
-    m = re.findall(r"([a-z']+)\((\d+)?(,)?(\d+)?\)", entries)
-    tot = 0
+    m = re.finditer(r"do\(\)|don't\(\)|mul\((\d+),(\d+)\)", entries)
     enable = True
-    for p in m:
-        if p[0].endswith("do"):
+    tot = 0
+    for e in m:
+        if e.group(0) == "do()":
             enable = True
-        elif p[0].endswith("don't"):
+        elif e.group(0) == "don't()":
             enable = False
-        elif p[0].endswith("mul") and p[2] == "," and enable:
-            try:
-                tot += int(p[1]) * int(p[3])
-            except ValueError:
-                pass
+        elif enable:
+            tot += int(e.group(1)) * int(e.group(2))
     return tot
 
 
