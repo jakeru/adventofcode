@@ -9,15 +9,18 @@ import re
 ORTHO_DIRS = ("N", "W", "S", "E")
 ALL_DIRS = ("N", "NW", "W", "SW", "S", "SE", "E", "NE")
 
+# Set to 1 for positive north and -1 for positive south.
+NORTH_INC = -1
+
 DIRS_XY = {
-    "N": (0, 1),
-    "NW": (-1, 1),
+    "N": (0, NORTH_INC),
+    "NW": (-1, NORTH_INC),
     "W": (-1, 0),
-    "SW": (-1, -1),
-    "S": (0, -1),
-    "SE": (1, -1),
+    "SW": (-1, -NORTH_INC),
+    "S": (0, -NORTH_INC),
+    "SE": (1, -NORTH_INC),
     "E": (1, 0),
-    "NE": (1, 1),
+    "NE": (1, NORTH_INC),
 }
 
 Point = namedtuple("Point", ["x", "y"])
@@ -116,14 +119,14 @@ class TestThis(unittest.TestCase):
         self.assertEqual(dir_x("NE"), 1)
 
     def test_dir_y(self):
-        self.assertEqual(dir_y("N"), 1)
-        self.assertEqual(dir_y("NW"), 1)
+        self.assertEqual(dir_y("N"), NORTH_INC)
+        self.assertEqual(dir_y("NW"), NORTH_INC)
         self.assertEqual(dir_y("W"), 0)
-        self.assertEqual(dir_y("SW"), -1)
-        self.assertEqual(dir_y("S"), -1)
-        self.assertEqual(dir_y("SE"), -1)
+        self.assertEqual(dir_y("SW"), -NORTH_INC)
+        self.assertEqual(dir_y("S"), -NORTH_INC)
+        self.assertEqual(dir_y("SE"), -NORTH_INC)
         self.assertEqual(dir_y("E"), 0)
-        self.assertEqual(dir_y("NE"), 1)
+        self.assertEqual(dir_y("NE"), NORTH_INC)
 
     def test_opposite_dir(self):
         self.assertEqual(opposite_dir("N"), "S")
