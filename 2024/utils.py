@@ -56,7 +56,7 @@ def dir_y(d):
 
 
 def walk(pos, dir, steps=1):
-    return Point(pos.x + dir_x(dir) * steps, pos.y + dir_y(dir) * steps)
+    return Point(pos[0] + dir_x(dir) * steps, pos[1] + dir_y(dir) * steps)
 
 
 def turn(d, steps):
