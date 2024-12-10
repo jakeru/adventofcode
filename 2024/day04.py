@@ -5,6 +5,7 @@
 import os
 import unittest
 import sys
+from itertools import product
 
 # https://github.com/wimglenn/advent-of-code-data
 # pip install advent-of-code-data
@@ -12,27 +13,18 @@ import aocd
 
 
 def parse_input(input):
-    return input.strip().split("\n")
+    entries = input.strip().split("\n")
+    S = len(entries)
+    assert S == len(entries[0])
+    grid = {(x, y): entries[y][x] for x, y in product(range(S), range(S))}
+    return grid, S
 
 
 def num_times_in(text):
     return sum([text[start:].startswith("XMAS") for start, _ in enumerate(text)])
 
 
-def build_grid(entries):
-    grid = {}
-    for y in range(S):
-        for x in range(S):
-            grid[(x, y)] = entries[y][x]
-    return grid
-
-
-def solve_a(entries):
-    S = len(entries)
-    assert S == len(entries[0])
-
-    grid = build_grid(entries)
-
+def solve_a(grid, S):
     lines = []
 
     # Horisontal
@@ -68,23 +60,17 @@ def solve_a(entries):
     return sum([num_times_in(line) + num_times_in(line[::-1]) for line in lines])
 
 
-def solve_b(entries):
-    S = len(entries)
-    assert S == len(entries[0])
-
-    grid = build_grid(entries)
-
+def solve_b(grid, S):
     total = 0
-    for sy in range(S):
-        for sx in range(S):
-            if grid.get((sx, sy)) != "A":
-                continue
-            w1 = grid.get((sx - 1, sy - 1)) == "M" and grid.get((sx + 1, sy + 1)) == "S"
-            w2 = grid.get((sx - 1, sy - 1)) == "S" and grid.get((sx + 1, sy + 1)) == "M"
-            w3 = grid.get((sx - 1, sy + 1)) == "M" and grid.get((sx + 1, sy - 1)) == "S"
-            w4 = grid.get((sx - 1, sy + 1)) == "S" and grid.get((sx + 1, sy - 1)) == "M"
-            if (w1 or w2) and (w3 or w4):
-                total += 1
+    for sx, sy in product(range(S), range(S)):
+        if grid.get((sx, sy)) != "A":
+            continue
+        w1 = grid.get((sx - 1, sy - 1)) == "M" and grid.get((sx + 1, sy + 1)) == "S"
+        w2 = grid.get((sx - 1, sy - 1)) == "S" and grid.get((sx + 1, sy + 1)) == "M"
+        w3 = grid.get((sx - 1, sy + 1)) == "M" and grid.get((sx + 1, sy - 1)) == "S"
+        w4 = grid.get((sx - 1, sy + 1)) == "S" and grid.get((sx + 1, sy - 1)) == "M"
+        if (w1 or w2) and (w3 or w4):
+            total += 1
     return total
 
 
@@ -119,10 +105,10 @@ M.M.M.M.M.
 
     def test_a(self):
         self.assertEqual(num_times_in("_XMAS_XMAS_"), 2)
-        self.assertEqual(solve_a(parse_input(self.input_a)), 18)
+        self.assertEqual(solve_a(*parse_input(self.input_a)), 18)
 
     def test_b(self):
-        self.assertEqual(solve_b(parse_input(self.input_b)), 9)
+        self.assertEqual(solve_b(*parse_input(self.input_b)), 9)
 
 
 if __name__ == "__main__":
@@ -137,7 +123,7 @@ if __name__ == "__main__":
 
     for part, solver in parts.items():
         submit = part in sys.argv
-        answer = solver(entries)
+        answer = solver(*entries)
         print(f"Answer of part {part}:")
         print(answer)
         if answer is not None and submit:
