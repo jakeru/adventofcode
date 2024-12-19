@@ -5,6 +5,7 @@
 import unittest
 from collections import namedtuple
 import re
+import heapq
 
 ORTHO_DIRS = ("N", "W", "S", "E")
 ALL_DIRS = ("N", "NW", "W", "SW", "S", "SE", "E", "NE")
@@ -94,6 +95,40 @@ def parse_unsigned_ints(string):
 
 def parse_digits(string):
     return tuple(map(int, filter(str.isdigit, string)))
+
+
+def djikstra(maze, find_moves, start, goal):
+    """
+    Finds the minimum cost of going from `start` to `goal` or `None` if it is
+    not possible.
+
+    The argument `find_moves` should point to a function with the following
+    signature: `find_moves(maze, state)`.
+    The function should return a list of tuples (cost, state) with states
+    reachable from the current state. The `cost` should be the cost to go from
+    current state to reach the corresponding new state. The cost is not allowed
+    to be negative.
+    """
+    costs = {}
+    Q = []
+    visited = set()
+
+    costs[goal] = 0
+    heapq.heappush(Q, (costs[goal], goal))
+
+    while Q:
+        cost, state = heapq.heappop(Q)
+        if state == start:
+            break
+        elif state in visited:
+            continue
+        visited.add(state)
+        for added_cost, new_state in find_moves(maze, state):
+            if new_state not in costs or cost + added_cost < costs[new_state]:
+                costs[new_state] = cost + added_cost
+                heapq.heappush(Q, (cost + added_cost, new_state))
+
+    return costs.get(start)
 
 
 # Execute tests with:
